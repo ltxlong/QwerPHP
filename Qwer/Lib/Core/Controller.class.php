@@ -88,7 +88,7 @@ class Controller extends SmartyView
     protected function assign($varName,$varValue)
     {
         //设置变量 $varName 必须是字符串 $varValue可以是字符串 也可以是对象
-        //如果smarty开启，则用smarty的assi方法，否则用本框架的assign方法
+        //如果smarty开启，则用smarty的assign方法，否则用本框架的assign方法
         if(C('SMARTY_ON')){
             parent::assign($varName,$varValue);
         }else{
