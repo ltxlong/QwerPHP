@@ -1,0 +1,14 @@
+{
+    "name": "ltxlong/qwer-php",
+    "description": "a simple develop framework for php",
+    "type": "php-framework",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "ltxlong",
+            "email": "416803647@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
