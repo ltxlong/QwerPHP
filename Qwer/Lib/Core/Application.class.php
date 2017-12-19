@@ -145,6 +145,27 @@ str;
         //是否开启session
         C('SESSION_AUTO_START') && session_start();
 
+        //创建默认header和footer文件
+        $defaultHeaderPath = APP_DEFAULT_THEME_PATH . '/' . C('DEFAULT_HEADER') . C('TEMPLATE_SUFFIX');
+        $defaultHeaderCode = <<<str
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+str;
+        is_file($defaultHeaderPath) || file_put_contents($defaultHeaderPath,$defaultHeaderCode);//如果默认主题没有header文件则创建
+
+        $defaultFooterPath = APP_DEFAULT_THEME_PATH . '/' . C('DEFAULT_FOOTER') . C('TEMPLATE_SUFFIX');
+        $defaultFooterCode = <<<str
+</body>
+</html>
+str;
+        is_file($defaultFooterPath) || file_put_contents($defaultFooterPath,$defaultFooterCode);//如果默认主题没有footer文件则创建
+
+
     }
 
     /**
@@ -177,7 +198,7 @@ class IndexController extends Controller
     public function index()
     {
         header('charset=utf-8');
-        echo '欢迎使用QwerPHP框架！';
+        echo '<h1 style="text-align: center;margin-top: 90px;">'.'欢迎使用QwerPHP框架！'.'</h1>';
     }
 }
 str;

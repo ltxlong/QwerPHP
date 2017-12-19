@@ -58,6 +58,10 @@ final class qwer
         define('APP_PUBLIC_PATH',APP_TPL_PATH . '/Public');
         define('APP_COMPILE_PATH',TEMP_PATH . '/' . APP_NAME . '/Compile');
         define('APP_CACHE_PATH',TEMP_PATH . '/' . APP_NAME . '/Cache');
+        define('APP_DEFAULT_THEME_PATH',APP_PUBLIC_PATH . '/default');
+        define('APP_DEFAULT_CSS_PATH',APP_DEFAULT_THEME_PATH . '/css');
+        define('APP_DEFAULT_IMAGES_PATH',APP_DEFAULT_THEME_PATH . '/images');
+        define('APP_DEFAULT_JS_PATH',APP_DEFAULT_THEME_PATH . '/js');
         //公共目录
         define('COMMON_PATH',ROOT_PATH . '/Common');
         //公共配置项文件夹
@@ -93,6 +97,10 @@ final class qwer
             APP_CONTROLLER_PATH,
             APP_TPL_PATH,
             APP_PUBLIC_PATH,
+            APP_DEFAULT_THEME_PATH,
+            APP_DEFAULT_CSS_PATH,
+            APP_DEFAULT_IMAGES_PATH,
+            APP_DEFAULT_JS_PATH,
             TEMP_PATH,
             APP_COMPILE_PATH,
             APP_CACHE_PATH,

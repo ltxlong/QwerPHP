@@ -138,6 +138,59 @@ class Controller extends SmartyView
     }
 
     /**
+     * [show]
+     * 整合assign和display两个方法
+     * 可以不传参，或传一个参数，或传两个参数
+     * 和render方法的区别：show方法分离了header和footer
+     * 注意：
+     * 用show方法的时候，相应的模板要去掉body以上和以下的所有标签，
+     * 这样header+模板+footer拼接为一个完整的页面
+     * @param null $tpl
+     * @param array $data
+     */
+    protected function show($tpl=NULL, $data=array())
+    {
+        $num_args = func_num_args();
+        $themePath = APP_PUBLIC_PATH . '/' . C('DEFAULT_THEME');
+        is_dir($themePath) || halt('主题路径配置错误！相应文件夹不存在！');
+        $headerPath = $themePath . '/' . C('DEFAULT_HEADER') . C('TEMPLATE_SUFFIX');
+        is_file($headerPath) || halt($headerPath . ' 文件不存在');
+        $footerPath = $themePath . '/' . C('DEFAULT_FOOTER') . C('TEMPLATE_SUFFIX');
+        is_file($footerPath) || halt($footerPath . ' 文件不存在');
+
+        include_once $headerPath;
+        if($num_args == 0){
+            //如果不传参
+            $this->display();
+        }elseif ($num_args == 1){
+            if(is_array(func_get_arg(0))){//如果只传$data
+                $data = func_get_arg(0);
+                foreach ($data as $k => $v){
+                    $this->assign($k, $v);
+                }
+                $this->display();
+            }elseif (is_string(func_get_arg(0))){//如果只传$tpl
+                $this->display($tpl);
+            }else{
+                halt('render方法参数异常！');
+            }
+        }elseif ($num_args == 2){
+            //如果传两个参数
+            if((is_array(func_get_arg(0)) && is_string(func_get_arg(1))) || (is_string(func_get_arg(0)) && is_array(func_get_arg(1)))){
+                foreach ($data as $k => $v){
+                    $this->assign($k, $v);
+                }
+                $this->display($tpl);
+            }else{
+                halt('render方法参数异常！');
+            }
+        }else{
+            halt('render方法参数异常！');
+        }
+        include_once $footerPath;
+    }
+
+    /**
      * [success]
      * 成功提示方法
      */

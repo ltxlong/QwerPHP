@@ -27,6 +27,12 @@ return array(
     'AUTO_LOAD_FILE' => array(),
     //视图模板默认后缀
     'TEMPLATE_SUFFIX' => '.html',
+    //默认主题路径
+    'DEFAULT_THEME' => 'default',
+    //默认主题头部
+    'DEFAULT_HEADER' => 'header',
+    //默认主题尾部
+    'DEFAULT_FOOTER' => 'footer',
 
     //数据库配置项
     'DB_CHARSET' => 'utf8',
