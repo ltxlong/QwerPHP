@@ -13,6 +13,8 @@ return array(
     'DEFAULT_TIME_ZONE' => 'PRC',
     //session自动开启
     'SESSION_AUTO_START' => true,
+    //伪静态Url解析开关(支持controller/action的方式，至于index.php的隐藏要在相应的服务器配置文件进行配置)
+    'RewriteRule_ON' => true,
     //url的控制器访问变量
     'VAR_CONTROLLER' => 'c',
     //url的方法访问变量

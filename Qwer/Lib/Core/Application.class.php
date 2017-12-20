@@ -213,8 +213,33 @@ str;
      */
     private static function _app_run()
     {
-        $c = isset($_GET[C('VAR_CONTROLLER')]) ? $_GET[C('VAR_CONTROLLER')] : 'Index';
-        $a = isset($_GET[C('VAR_ACTION')]) ? $_GET[C('VAR_ACTION')] : 'index';
+        if(C('RewriteRule_ON')){
+            //如果开启了rewrite解析开关
+            if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != '/'){
+                $rPath = $_SERVER['REQUEST_URI'];
+                $rPathArr = explode('/',trim($rPath,'/'));
+                $c = ucfirst($rPathArr[0]);
+                unset($rPathArr[0]);
+                $a = empty($rPathArr[1]) ? 'index' : $rPathArr[1];
+                unset($rPathArr[1]);
+
+                //url 多余部分转换成 GET
+                $countNum = count($rPathArr) + 2;
+                $i = 2;
+                while ($i < $countNum){
+                    if(isset($rPathArr[$i + 1])){
+                        $_GET[$rPathArr[$i]] = $rPathArr[$i + 1];
+                    }
+                    $i = $i + 2;
+                }
+            }else{
+                $c = 'Index';
+                $a = 'index';
+            }
+        }else{
+            $c = isset($_GET[C('VAR_CONTROLLER')]) ? $_GET[C('VAR_CONTROLLER')] : 'Index';
+            $a = isset($_GET[C('VAR_ACTION')]) ? $_GET[C('VAR_ACTION')] : 'index';
+        }
 
         define('CONTROLLER', $c);//定义访问的控制器常量
         define('ACTION', $a);//定义访问的方法常量
