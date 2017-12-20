@@ -12,13 +12,13 @@ return array(
     //默认时区
     'DEFAULT_TIME_ZONE' => 'PRC',
     //session自动开启
-    'SESSION_AUTO_START' => TRUE,
+    'SESSION_AUTO_START' => true,
     //url的控制器访问变量
     'VAR_CONTROLLER' => 'c',
     //url的方法访问变量
     'VAR_ACTION' => 'a',
     //是否开启日志
-    'SAVE_LOG' => TRUE,
+    'SAVE_LOG' => true,
     //错误跳转的地址
     'ERROR_URL' => '',
     //错误提示的信息
@@ -48,6 +48,6 @@ return array(
     'LEFT_DELIMITER' => '{',
     'RIGHT_DELIMITER' => '}',
     'CACHE_ON' => false,
-    'CACHE_TIME' => 2
+    'CACHE_TIME' => 60
 );
 
