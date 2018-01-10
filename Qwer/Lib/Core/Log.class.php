@@ -5,7 +5,7 @@
  * Date: 2017/12/18
  * Time: 19:02
  */
-
+namespace core;
 /**
  * Class Log
  * 日志类

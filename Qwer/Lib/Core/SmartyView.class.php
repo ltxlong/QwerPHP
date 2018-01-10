@@ -5,11 +5,12 @@
  * Date: 2017/12/18
  * Time: 19:04
  */
-
+namespace core;
 /**
  * Class SmartyView
  * 此类为本框架与Smarty的桥梁
  */
+
 class SmartyView
 {
 
@@ -25,9 +26,17 @@ class SmartyView
     public function __construct()
     {
         if(!is_null(self::$smarty)) return;
-        $smarty = new Smarty();
+        $smarty = new \Smarty();
+
+        if(C('ANOTHER_ROUTE_ON')){
+            //如果开启了第三方路由组件
+            $cNameArr = array_reverse(explode('\\',get_called_class()));
+            $controllerName = substr($cNameArr[0],0,-10);
+        }else{
+            $controllerName = CONTROLLER;
+        }
         //模板目录
-        $smarty->template_dir = APP_TPL_PATH . '/' . CONTROLLER . '/';
+        $smarty->template_dir = APP_VIEWS_PATH . '/' . strtolower($controllerName) . '/';
         //编译目录
         $smarty->compile_dir = APP_COMPILE_PATH;
         //定界符
@@ -50,7 +59,7 @@ class SmartyView
      */
     protected function display($tpl)
     {
-        self::$smarty->display($tpl,$_SERVER['REQUEST_URI']);
+        self::$smarty->display($tpl);
     }
 
     /**

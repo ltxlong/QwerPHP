@@ -16,5 +16,18 @@
             "url": "https://packagist.phpcomposer.com"
         }
     },
-    "require": {}
+    "require": {
+        "filp/whoops": "^2.0@dev",
+        "smarty/smarty": "^3.1@dev",
+        "noahbuscher/macaw": "dev-master",
+        "illuminate/database": "5.4.x-dev"
+    },
+    "autoload": {
+        "files":["qwer/lib/function/functions.php"],
+        "classmap":["qwer/lib/core/"],
+        "psr-4":{
+            "app\\":"app/",
+            "core\\":"qwer/lib/core/"
+        }
+    }
 }

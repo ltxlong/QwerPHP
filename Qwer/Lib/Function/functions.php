@@ -14,12 +14,12 @@
  * @param int $type
  * @param null $dest
  */
-function halt($error,$level='ERROR',$type=3,$dest=NULL)
+function halt($error,$level='ERROR',$type=3,$dest=null)
 {
     if(is_array($error)){
-        Log::write($error['message'],$level,$type,$dest);
+        \core\Log::write($error['message'],$level,$type,$dest);
     }else{
-        Log::write($error,$level,$type,$dest);
+        \core\Log::write($error,$level,$type,$dest);
     }
 
     $e = array();
@@ -48,8 +48,10 @@ function halt($error,$level='ERROR',$type=3,$dest=NULL)
             $e['message'] = C('ERROR_MSG');
         }
     }
-    include DATA_PATH . '/Tpl/halt.php';
+
+    include TPL_PATH . '/halt.php';
     die;
+
 }
 /**
  * [p]
@@ -61,7 +63,7 @@ function p($arr)
     if(is_bool($arr)){
         var_dump($arr);
     }elseif (is_null($arr)){
-        var_dump(NULL);
+        var_dump(null);
     }else{
         echo '<pre style="padding: 10px;border-radius: 5px;background: #f5f5f5;border: 1px solid #ccc;font-size: 16px;">' . print_r($arr,true) . '</pre>';
     }
@@ -95,9 +97,11 @@ function go($url, $time=0, $msg='')
  * C('CODE_LEN',20)
  * 4.C();读取所有的配置项
  */
-function C($var = NULL, $value = NULL)
+function C($var = null, $value = null)
 {
     static $config = array();
+    static $bootstrap_config = array();
+
     //加载配置项
     if(is_array($var)){
         $config = array_merge($config,array_change_key_case($var,CASE_UPPER));//后加载的优先级更高
@@ -112,12 +116,58 @@ function C($var = NULL, $value = NULL)
             return;//return为了在这里结束，不走下面
         }
         //一个参数传递
-        return isset($config[$var]) ? $config[$var] : NULL;
+        if(empty($config)){
+            //在bootstrap启动器里面用到读取配置项
+            if(empty($bootstrap_config)){
+                $root_path = str_replace('\\','/',dirname(dirname(dirname(__DIR__))));
+                $qwer_config_path = $root_path . '/qwer/config/config.php';//框架配置项
+                $common_config_path = $root_path . '/common/config/config.php';//公共配置项
+                $app_config_path = $root_path . '/app/' . APP_NAME . '/config/config.php';//应用配置项
+
+                $qwer_config = include $qwer_config_path;
+
+                $bootstrap_config = array_merge($bootstrap_config,array_change_key_case($qwer_config,CASE_UPPER));//后加载的优先级更高
+                if(is_file($common_config_path)){
+                    $common_config = include $common_config_path;
+                    $bootstrap_config = array_merge($bootstrap_config,array_change_key_case($common_config,CASE_UPPER));//后加载的优先级更高
+                }
+                if(is_file($app_config_path)){
+                    $app_config = include $app_config_path;
+                    $bootstrap_config = array_merge($bootstrap_config,array_change_key_case($app_config,CASE_UPPER));//后加载的优先级更高
+                }
+            }
+            return isset($bootstrap_config[$var]) ? $bootstrap_config[$var] : null;
+        }
+
+        return isset($config[$var]) ? $config[$var] : null;
 
     }
     //不传参，则返回所有配置项
     if(is_null($var) && is_null($value)){
-        return $config;
+        if(empty($config)){
+            //在bootstrap启动器里面用到读取配置项
+            if(empty($bootstrap_config)){
+                $root_path = str_replace('\\','/',dirname(dirname(dirname(__DIR__))));
+                $qwer_config_path = $root_path . '/qwer/config/config.php';//框架配置项
+                $common_config_path = $root_path . '/common/config/config.php';//公共配置项
+                $app_config_path = $root_path . '/app/' . APP_NAME . '/config/config.php';//应用配置项
+
+                $qwer_config = include $qwer_config_path;
+
+                $bootstrap_config = array_merge($bootstrap_config,array_change_key_case($qwer_config,CASE_UPPER));//后加载的优先级更高
+                if(is_file($common_config_path)){
+                    $common_config = include $common_config_path;
+                    $bootstrap_config = array_merge($bootstrap_config,array_change_key_case($common_config,CASE_UPPER));//后加载的优先级更高
+                }
+                if(is_file($app_config_path)){
+                    $app_config = include $app_config_path;
+                    $bootstrap_config = array_merge($bootstrap_config,array_change_key_case($app_config,CASE_UPPER));//后加载的优先级更高
+                }
+            }
+            return $bootstrap_config;
+        }else{
+            return $config;
+        }
     }
 }
 
@@ -135,22 +185,45 @@ function print_const()
  * [M]
  * 返回实例化的Model对象
  * @param $table
- * @return Model
+ * @return \core\Model
  */
 function M($table)
 {
-    return new Model($table);
+    return new \core\Model($table);
 }
 
 /**
  * [K]
- * 返回实例化的扩展Model对象
- * @param $model
+ * 返回实例化的扩展Model对象(继承的是框架内置Model类)
+ * 扩展模型可以自己封装函数增加功能，可扩展性强
+ * 扩展模型拥有框架内置模型的所有功能，并且还可以扩展新的功能（增加业务逻辑等等）
+ * 一个表建一个扩展模型
+ * 扩展模型放在应用的models文件夹里面，models文件夹只放扩展模型
+ * MVC里面，可以没有models文件夹，是为了放扩展模型才建的
+ * @param $modelName
  * @return mixed
  */
-function K($model)
+function K($modelName)
 {
-    $model .= 'Model';
-    return new $model;
+    $app_model_path = '\app\\' . APP_NAME . '\models\\';
+    $k_model = $app_model_path.$modelName.'Model';
+    return new $k_model;
+}
+
+/**
+ * [get_ormDatabaseConfig]
+ * 获取第三方ORM组件的配置
+ * @param $ormDatabasePath
+ * @return mixed
+ */
+function get_ormDatabaseConfig($ormDatabasePath)
+{
+    $root_path = str_replace('\\','/',dirname(dirname(dirname(__DIR__))));
+    if(is_file($root_path . $ormDatabasePath)){
+        $ormDatabaseConfig = require $root_path . $ormDatabasePath;
+    }else{
+        $ormDatabaseConfig = require $root_path . '/qwer/config/ormDatabase.php';
+    }
+    return $ormDatabaseConfig;
 }
 

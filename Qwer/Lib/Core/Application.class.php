@@ -5,7 +5,7 @@
  * Date: 2017/12/18
  * Time: 19:06
  */
-
+namespace core;
 /**
  * Class Application
  * 应用类
@@ -17,9 +17,7 @@ final class Application
         self::_init();//初始化框架
         set_error_handler(array(__CLASS__,'error'));//美化错误处理页面
         register_shutdown_function(array(__CLASS__,'fatal_error'));//美化致命错误页面
-        self::_user_import();//载入用户自定义功能
         self::_set_url();//设置外部路径
-        spl_autoload_register(array(__CLASS__,'_autoload'));//注册自动载入
         self::_create_demo();//创建欢迎使用框架页面
         self::_app_run();//实例化应用管理器
     }
@@ -34,6 +32,7 @@ final class Application
             self::error($e['type'],$e['message'],$e['file'],$e['line']);
         }
     }
+
     /**
      * [error]
      * 加载自己美化的错误处理页面
@@ -59,49 +58,12 @@ final class Application
             case E_USER_NOTICE:
             default:
                 if(DEBUG){
-                    include DATA_PATH . '/Tpl/notice.php';
+                    include TPL_PATH . '/notice.php';
                 }
                 break;
         }
     }
-    /**
-     * [_autoload]
-     * 自动载入功能
-     * @param $className
-     */
-    private static function _autoload($className)
-    {
-        switch (true){
-            //判断是否是控制器controller，控制器的固定格式是XxxController.class.php
-            case strlen($className) > 10 && substr($className,-10) == 'Controller':
-                $path = APP_CONTROLLER_PATH . '/'. $className . '.class.php';//固定类的后缀是.class.php
-                if(!is_file($path)){
-                    $emptyPath = APP_CONTROLLER_PATH . '/EmptyController.class.php';
-                    if(is_file($emptyPath)){
-                        include $emptyPath;
-                        return;
-                    }else{
-                        halt($path . '控制器未找到');
-                    }
 
-                }
-                include $path;
-                break;
-            //判断是否是模型Model，模型的固定格式是XxxModel.class.php
-            case strlen($className) > 5 && substr($className, -5) == 'Model':
-                $path = COMMON_MODEL_PATH . '/' . $className . '.class.php';//固定类的后缀是.class.php
-                is_file($path) || halt($path . '模型未找到');
-                include $path;
-                break;
-            default:
-                //默认是工具类
-                $path = TOOL_PATH . '/' . $className . '.class.php';//固定类的后缀是.class.php
-                is_file($path) || halt($path . '类未找到');
-                include $path;
-                break;
-        }
-
-    }
     /**
      * [_init]
      * 初始化框架
@@ -113,13 +75,14 @@ final class Application
         C(include CONFIG_PATH . '/config.php');
 
         //公共配置项
-        $commonPath = COMMON_CONFIG_PATH . '/' .'/config.php';
+        $commonPath = COMMON_CONFIG_PATH . '/config.php';
 
         $commonConfig = <<<str
 <?php
 return array(
     //配置项 => 配置值
 );
+
 str;
 
         is_file($commonPath) || file_put_contents($commonPath,$commonConfig);//如果公共配置项文件不存在，则创建
@@ -134,11 +97,72 @@ str;
 return array(
     //配置项 => 配置值
 );
+
 str;
         is_file($userPath) || file_put_contents($userPath,$userConfig);//如果用户配置项文件不存在，则创建
         //加载用户配置项
         C(include $userPath);
 
+        //创建框架默认扩展模型的示例文件
+        $app_name = APP_NAME;
+        $exampleModelPath = APP_MODELS_PATH . '/exampleModel.php';
+        $exampleModelStr = <<<str
+<?php
+namespace app\\$app_name\models;
+
+use core\Model;
+//框架默认扩展模型的示例文件
+class exampleModel extends Model
+{
+    //配置对应的表名，一个扩展模型对应一个张表
+    public \$table = 'example';
+    //自定义扩展业务逻辑函数
+    public function get_all_data()
+    {
+        //可以在数据存取前增加业务逻辑等等
+        return \$this->all();
+    }
+}
+
+str;
+        if(C('CREATE_EXAMPLE_MODEL_ON')){
+            //如果开启了创建框架默认扩展模型示例文件的配置项
+            is_file($exampleModelPath) || file_put_contents($exampleModelPath,$exampleModelStr);//如果框架默认扩展模型示例文件不存在，则创建
+        }
+
+        //创建第三方路由默认配置文件
+        $routesPath = APP_CONFIG_PATH . '/routes.php';
+        $routesConfig = <<<str
+<?php
+use NoahBuscher\Macaw\Macaw;
+
+define('INDEX_CONTROLLER','app\index\controllers\\\');
+Macaw::get('',INDEX_CONTROLLER .'IndexController@index');
+Macaw::error(function (){
+    throw new Exception("路由无匹配项 404 Not Found");
+});
+Macaw::dispatch();
+
+str;
+        is_file($routesPath) || file_put_contents($routesPath,$routesConfig);//如果第三方路由配置文件不存在，则创建
+
+        //创建第三方ORM组件默认配置文件
+        $ormPath = APP_CONFIG_PATH . '/ormDatabase.php';
+        $ormConfig = <<<str
+<?php
+return [
+    'driver'    => 'mysql',
+    'host'      => 'localhost',
+    'database'  => '',
+    'username'  => '',
+    'password'  => '',
+    'charset'   => 'utf8',
+    'collation' => 'utf8_general_ci',
+    'prefix'    => ''
+];
+
+str;
+        is_file($ormPath) || file_put_contents($ormPath,$ormConfig);//如果第三方ORM配置文件不存在，则创建
         //设置默认时区
         date_default_timezone_set(C('DEFAULT_TIME_ZONE'));
 
@@ -174,14 +198,13 @@ str;
      */
     private static function _set_url()
     {
-        //p($_SERVER);
         $path = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
         $path = str_replace('\\','/',$path);
         define('__APP__', $path);
         define('__ROOT__', dirname(__APP__));
 
-        define('__TPL__', __ROOT__ . '/' . APP_NAME . '/Tpl');
-        define('__PUBLIC__', __TPL__ . '/Public');
+        define('__VIEWS__', __ROOT__ . '/' . APP_NAME . '/views');
+        define('__PUBLIC__', __VIEWS__ . '/public');
     }
 
     /**
@@ -190,9 +213,14 @@ str;
      */
     private static function _create_demo()
     {
-        $path = APP_CONTROLLER_PATH . '/IndexController.class.php';
+        $app_name = APP_NAME;
+        $path = APP_CONTROLLERS_PATH . '/IndexController.php';
         $str = <<<str
 <?php
+namespace app\\$app_name\controllers;
+
+use core\Controller;
+
 class IndexController extends Controller
 {
     public function index()
@@ -201,6 +229,7 @@ class IndexController extends Controller
         echo '<h1 style="text-align: center;margin-top: 90px;">'.'欢迎使用QwerPHP框架！'.'</h1>';
     }
 }
+
 str;
 
         is_file($path) || file_put_contents($path, $str);//如果默认控制器不存在，则创建（用于初次运行框架时显示的欢迎页）
@@ -213,6 +242,10 @@ str;
      */
     private static function _app_run()
     {
+        if(C('ANOTHER_ROUTE_ON')){
+            //如果开启了第三方路由组件
+            return;
+        }
         if(C('RewriteRule_ON')){
             //如果开启了rewrite解析开关
             if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] != '/'){
@@ -233,11 +266,11 @@ str;
                     $i = $i + 2;
                 }
             }else{
-                $c = 'Index';
+                $c = 'index';
                 $a = 'index';
             }
         }else{
-            $c = isset($_GET[C('VAR_CONTROLLER')]) ? $_GET[C('VAR_CONTROLLER')] : 'Index';
+            $c = isset($_GET[C('VAR_CONTROLLER')]) ? ucfirst($_GET[C('VAR_CONTROLLER')]) : 'index';
             $a = isset($_GET[C('VAR_ACTION')]) ? $_GET[C('VAR_ACTION')] : 'index';
         }
 
@@ -245,44 +278,62 @@ str;
         define('ACTION', $a);//定义访问的方法常量
 
         $c .= 'Controller';//固定了控制器类名格式为xxxController
-        if(class_exists($c)){
-            $obj = new $c();
-            if(!method_exists($obj, $a))
+
+        $classPath = '\\app\\' . APP_NAME . '\controllers\\'. $c;
+
+        if(class_exists($classPath)){//不用is_file判断，改为用class_exist
+
+            $ref = new \ReflectionClass($classPath);
+
+            //检查类是否可实例化, 排除抽象类abstract和对象接口interface
+            if(!$ref->isInstantiable()){
+                halt('实例化异常！不能实例化该类：'.$c);
+            }
+
+            $instance = $ref->newInstance();
+
+            if(!$ref->hasMethod($a))
             {
                 //如果方法不存在
-                if(method_exists($obj, '__empty')){
-                    $obj->__empty();
+                if($ref->hasMethod('__empty')){
+                    $instance->__empty();
                 }else{
                     //如果__empty()都不存在
                     halt($c . '控制器中' . $a . '方法不存在！');
                 }
             }else{
-                $obj->$a();
+                $instance->$a();
             }
 
         }else{
-            $obj = new EmptyController();
-            $obj->index();
-        }
+            $empthClass = '\\app\\'.APP_NAME . '\controllers\EmptyController';
+            if(class_exists($empthClass)){//不用is_file判断，改为用class_exist
 
-    }
+                $ref = new \ReflectionClass($empthClass);
 
-    /**
-     * [_user_import]
-     * 自动加载Common/Lib目录下的文件，可以载入多个
-     * 可以实现用户自定义扩展功能，比如扩展自己定义的函数
-     */
-    private static function _user_import()
-    {
-        $fileArr = C('AUTO_LOAD_FILE');
-        if(is_array($fileArr) && !empty($fileArr)){
-            foreach ($fileArr as $v)
-            {
-                $path = COMMON_LIB_PATH . '/' . $v;
-                is_file($path) || halt($path . '文件不存在');
-                require_once $path;
+                if(!$ref->isInstantiable()){
+                    halt('实例化异常！不能实例化该类：'.$c);
+                }
+
+                $instance = $ref->newInstance();
+
+                if($ref->hasMethod('index')){
+                    $instance->index();
+                    return;
+                }else{
+                    if($ref->hasMethod('__empty')){
+                        $instance->__empty();
+                        return;
+                    }else{
+                        halt($c . '控制器未找到');
+                    }
+                }
+            }else{
+                halt($c . '控制器未找到');
             }
         }
+
     }
+
 }
 

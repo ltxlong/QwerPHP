@@ -25,8 +25,6 @@ return array(
     'ERROR_URL' => '',
     //错误提示的信息
     'ERROR_MSG' => '网站出错了，请稍后再试...',
-    //自动加载Common/Lib目录下的文件，可以载入多个，比如array('func1.php','func2.php','func3.php'),array()则为不加载
-    'AUTO_LOAD_FILE' => array(),
     //视图模板默认后缀
     'TEMPLATE_SUFFIX' => '.html',
     //默认主题路径
@@ -35,8 +33,16 @@ return array(
     'DEFAULT_HEADER' => 'header',
     //默认主题尾部
     'DEFAULT_FOOTER' => 'footer',
+    //生成扩展模型示例开关
+    'CREATE_EXAMPLE_MODEL_ON' => true,
+    //第三方错误调试库开关
+    'ANOTHER_HALT_ON' => true,
+    //第三方路由组件开关
+    'ANOTHER_ROUTE_ON' => true,
+    //第三方ORM组件开关
+    'ANOTHER_ORM_ON' => true,
 
-    //数据库配置项
+    //框架内置数据库配置项，已默认用第三方的ORM组件和相应的ORM配置项，不用这个
     'DB_CHARSET' => 'utf8',
     'DB_HOST' => '127.0.0.1',
     'DB_PORT' => '3306',

@@ -5,7 +5,7 @@
  * Date: 2017/12/18
  * Time: 19:05
  */
-
+namespace core;
 /**
  * Class Controller
  * 控制器父类
@@ -48,12 +48,25 @@ class Controller extends SmartyView
      */
     protected function get_tpl($tpl)
     {
+        if(C('ANOTHER_ROUTE_ON')){
+            //如果开启了第三方路由组件
+            //获取要访问的控制器名称
+            $cNameArr = array_reverse(explode('\\',get_called_class()));
+            $controllerName = substr($cNameArr[0],0,-10);
+            //获取要访问的方法名称
+            $backtrace = debug_backtrace();
+            $actionName = $backtrace[2]['function'];
+        }else{
+            $controllerName = CONTROLLER;
+            $actionName = ACTION;
+        }
+
         if(is_null($tpl)){
-            $path = APP_TPL_PATH . '/' . CONTROLLER . '/' . ACTION . C('TEMPLATE_SUFFIX');
+            $path = APP_VIEWS_PATH . '/' . strtolower($controllerName) . '/' . $actionName . C('TEMPLATE_SUFFIX');
         }else{
             $suffix = strrchr($tpl,'.');//判断传的参数有没有后缀
             $tpl = empty($suffix) ? $tpl . C('TEMPLATE_SUFFIX') : $tpl;//如果传的参数有后缀（比如'.html','.php','.tpl'），则按照传参的后缀
-            $path = APP_TPL_PATH . '/' . CONTROLLER . '/' .$tpl;
+            $path = APP_VIEWS_PATH . '/' . strtolower($controllerName) . '/' .$tpl;
         }
         return $path;
     }
@@ -61,9 +74,10 @@ class Controller extends SmartyView
     /**
      * [display]
      * 展示模板方法
+     * 基础方法
      * @param null $tpl
      */
-    protected function display($tpl=NULL)
+    protected function display($tpl=null)
     {
         $path = $this->get_tpl($tpl);
         if(!is_file($path)) halt($path . '模板文件不存在');
@@ -80,7 +94,7 @@ class Controller extends SmartyView
     /**
      * [assign]
      * 分配变量给模板
-     * 改进方向：将assign和display合成一个方法
+     * 基础方法
      * @param $varName
      * @param $varValue
      */
@@ -103,7 +117,7 @@ class Controller extends SmartyView
      * @param null $tpl
      * @param array $data
      */
-    protected function render($tpl=NULL, $data=array())
+    protected function render($tpl=null, $data=array())
     {
         $num_args = func_num_args();
         if($num_args == 0){
@@ -148,7 +162,7 @@ class Controller extends SmartyView
      * @param null $tpl
      * @param array $data
      */
-    protected function show($tpl=NULL, $data=array())
+    protected function show($tpl=null, $data=array())
     {
         $num_args = func_num_args();
         $themePath = APP_PUBLIC_PATH . '/' . C('DEFAULT_THEME');

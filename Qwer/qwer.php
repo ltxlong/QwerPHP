@@ -5,7 +5,7 @@
  * Date: 2017/12/18
  * Time: 17:25
  */
-
+use core\Application;
 /**
  * 框架核心类
  * Class Qwer
@@ -19,12 +19,9 @@ final class qwer
         if(DEBUG){
             //开发阶段，开启调试模式
             self::_create_dir();//创建文件夹
-            self::_import_file();//载入必须类
         }else{
             //上线阶段，关闭错误提示
             error_reporting(0);
-            //载入合并的必须类
-            require TEMP_PATH . '/~boot.php';
         }
         Application::run();//执行应用类
     }
@@ -37,39 +34,35 @@ final class qwer
     {
         $path = str_replace('\\','/',__FILE__);//将反斜杠\替换为正斜杠/，这样Windows、Mac、Linux等都适用
         define('QWER_PATH',dirname($path));//框架目录
-        define('CONFIG_PATH',QWER_PATH . '/Config');
-        define('DATA_PATH',QWER_PATH . '/Data');
-        define('LIB_PATH',QWER_PATH . '/Lib');
-        define('CORE_PATH',LIB_PATH . '/Core');
-        define('EXTENDS_PATH',QWER_PATH . '/Extends');
-        define('TOOL_PATH',EXTENDS_PATH . '/Tool');
-        define('ORG_PATH',EXTENDS_PATH . '/Org');
-        define('FUNCTION_PATH',LIB_PATH . '/Function');
+        define('CONFIG_PATH',QWER_PATH . '/config');
+        define('TPL_PATH',QWER_PATH . '/tpl');
+        define('LIB_PATH',QWER_PATH . '/lib');
+        define('CORE_PATH',LIB_PATH . '/core');
+        define('FUNCTION_PATH',LIB_PATH . '/function');
         define('ROOT_PATH',dirname(QWER_PATH));//根目录
         //临时目录
-        define('TEMP_PATH',ROOT_PATH . '/Temp');
+        define('RUNTIME_PATH',ROOT_PATH . '/runtime');
         //日志目录
-        define('LOG_PATH',TEMP_PATH . '/Log');
+        define('LOG_PATH',RUNTIME_PATH . '/log');
         //应用目录
-        define('APP_PATH',ROOT_PATH . '/' . APP_NAME);
-        define('APP_CONFIG_PATH',APP_PATH . '/Config');
-        define('APP_CONTROLLER_PATH',APP_PATH . '/Controller');
-        define('APP_TPL_PATH',APP_PATH . '/Tpl');
-        define('APP_PUBLIC_PATH',APP_TPL_PATH . '/Public');
-        define('APP_COMPILE_PATH',TEMP_PATH . '/' . APP_NAME . '/Compile');
-        define('APP_CACHE_PATH',TEMP_PATH . '/' . APP_NAME . '/Cache');
+        define('APP_PATH',ROOT_PATH . '/app/' . APP_NAME);
+        define('APP_CONFIG_PATH',APP_PATH . '/config');
+        define('APP_CONTROLLERS_PATH',APP_PATH . '/controllers');
+        define('APP_VIEWS_PATH',APP_PATH . '/views');
+        define('APP_MODELS_PATH',APP_PATH . '/models');
+        define('APP_PUBLIC_PATH',APP_VIEWS_PATH . '/public');
+        define('APP_COMPILE_PATH',RUNTIME_PATH . '/' . APP_NAME . '/compile');
+        define('APP_CACHE_PATH',RUNTIME_PATH . '/' . APP_NAME . '/cache');
         define('APP_DEFAULT_THEME_PATH',APP_PUBLIC_PATH . '/default');
         define('APP_DEFAULT_CSS_PATH',APP_DEFAULT_THEME_PATH . '/css');
         define('APP_DEFAULT_IMAGES_PATH',APP_DEFAULT_THEME_PATH . '/images');
         define('APP_DEFAULT_JS_PATH',APP_DEFAULT_THEME_PATH . '/js');
         //公共目录
-        define('COMMON_PATH',ROOT_PATH . '/Common');
+        define('COMMON_PATH',ROOT_PATH . '/common');
         //公共配置项文件夹
-        define('COMMON_CONFIG_PATH',COMMON_PATH . '/Config');
-        //公共模型文件夹
-        define('COMMON_MODEL_PATH',COMMON_PATH . '/Model');
+        define('COMMON_CONFIG_PATH',COMMON_PATH . '/config');
         //公共库文件夹
-        define('COMMON_LIB_PATH',COMMON_PATH . '/Lib');
+        define('COMMON_SERVICES_PATH',COMMON_PATH . '/services');
         //框架版本
         define('QWER_VERSION','1.0');
 
@@ -90,18 +83,18 @@ final class qwer
     {
         $arr = array(
             COMMON_CONFIG_PATH,
-            COMMON_MODEL_PATH,
-            COMMON_LIB_PATH,
+            COMMON_SERVICES_PATH,
             APP_PATH,
             APP_CONFIG_PATH,
-            APP_CONTROLLER_PATH,
-            APP_TPL_PATH,
+            APP_CONTROLLERS_PATH,
+            APP_VIEWS_PATH,
+            APP_MODELS_PATH,
             APP_PUBLIC_PATH,
             APP_DEFAULT_THEME_PATH,
             APP_DEFAULT_CSS_PATH,
             APP_DEFAULT_IMAGES_PATH,
             APP_DEFAULT_JS_PATH,
-            TEMP_PATH,
+            RUNTIME_PATH,
             APP_COMPILE_PATH,
             APP_CACHE_PATH,
             LOG_PATH
@@ -110,33 +103,6 @@ final class qwer
         foreach ($arr as $v){
             is_dir($v) || mkdir($v,0777,true);//判断目录是否已经存在，不存在则创建
         }
-    }
-
-    /**
-     * [_import_file]
-     * 载入框架所需文件
-     */
-    private static function _import_file()
-    {
-        //加载顺序固定
-        $fileArr = array(
-            CORE_PATH . '/Log.class.php',
-            FUNCTION_PATH . '/functions.php',
-            ORG_PATH . '/Smarty/Smarty.class.php',
-            CORE_PATH . '/SmartyView.class.php',
-            CORE_PATH . '/Controller.class.php',
-            CORE_PATH . '/Application.class.php'
-        );
-        $str = '';
-        foreach ($fileArr as $v){
-            $str .= trim(substr(file_get_contents($v), 5));//把以上所有必须的文件压到一个字符串里面
-            $str .= PHP_EOL;
-            $str .= PHP_EOL;
-            require_once $v;
-        }
-
-        $str = "<?php" . PHP_EOL . $str;
-        file_put_contents(TEMP_PATH . '/~boot.php', $str) || die('access not allow');//将这个字符串写入到临时文件夹的~boot.php中（上线的时候，加载这个文件就可以了），如果写入失败则提示没权限
     }
 }
 qwer::run();
