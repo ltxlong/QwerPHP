@@ -24,3 +24,4 @@ require dirname(__DIR__) . '/bootstrap.php';
 //示例文件在qwer/config目录中
 //要用第三方路由组件除了要加载routes.php外，还要开启 ANOTHER_ROUTE_ON 配置项，默认开启
 require dirname(__DIR__) . '/app/' . APP_NAME . '/config/routes.php';
+

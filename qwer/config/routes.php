@@ -21,3 +21,4 @@ Macaw::$error_callback = function (){
 };
 
 Macaw::dispatch();
+
