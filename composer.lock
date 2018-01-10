@@ -277,7 +277,7 @@
                 "orm",
                 "sql"
             ],
-            "time": "2017-12-07T13:59:34+00:00"
+            "time": "2017-12-07 13:59:34"
         },
         {
             "name": "illuminate/support",
@@ -395,12 +395,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/noahbuscher/macaw.git",
-                "reference": "34f08a61bea11b4dda369474f04ae7e432c7f9ad"
+                "reference": "cf4dd15893f97539f3f91bb296e04324fbbb379e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://files.phpcomposer.com/files/noahbuscher/macaw/34f08a61bea11b4dda369474f04ae7e432c7f9ad.zip",
-                "reference": "34f08a61bea11b4dda369474f04ae7e432c7f9ad",
+                "url": "https://files.phpcomposer.com/files/noahbuscher/macaw/cf4dd15893f97539f3f91bb296e04324fbbb379e.zip",
+                "reference": "cf4dd15893f97539f3f91bb296e04324fbbb379e",
                 "shasum": ""
             },
             "require": {
@@ -434,7 +434,7 @@
                 "php-router",
                 "router"
             ],
-            "time": "2017-12-18 16:31:35"
+            "time": "2018-01-09 05:51:33"
         },
         {
             "name": "paragonie/random_compat",
@@ -582,7 +582,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2017-11-22T00:21:09+00:00"
+            "time": "2017-11-22 00:21:09"
         },
         {
             "name": "symfony/polyfill-mbstring",
